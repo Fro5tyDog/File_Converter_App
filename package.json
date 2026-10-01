@@ -1,0 +1,27 @@
+{
+  "name": "media-converter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "On-device photo, video and audio converter. Runs on GitHub Pages and as a sideloaded iOS/Android app that updates itself from GitHub.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:site": "node scripts/build.mjs --site",
+    "serve": "npx --yes http-server build/www -p 8080 -c-1",
+    "cap:sync": "npm run build && npx cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "@capgo/capacitor-updater": "^7.0.0",
+    "@ffmpeg/core": "^0.12.6",
+    "@ffmpeg/ffmpeg": "^0.12.10",
+    "heic2any": "^0.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

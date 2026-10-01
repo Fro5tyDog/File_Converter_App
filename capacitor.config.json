@@ -1,0 +1,24 @@
+{
+  "appId": "com.local.mediaconverter",
+  "appName": "Convert",
+  "webDir": "build/www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#121110"
+  },
+  "android": {
+    "backgroundColor": "#121110"
+  },
+  "plugins": {
+    "CapacitorUpdater": {
+      "autoUpdate": false,
+      "statsUrl": "",
+      "channelUrl": "",
+      "updateUrl": "",
+      "autoDeleteFailed": true,
+      "autoDeletePrevious": true,
+      "resetWhenUpdate": true,
+      "appReadyTimeout": 15000
+    }
+  }
+}

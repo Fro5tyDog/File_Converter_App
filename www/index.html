@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Convert</title>
+  <meta name="description" content="Convert photos, videos and audio on your device.">
+  <meta name="theme-color" content="#121110" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Convert">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="app.css">
+  <!-- Capacitor runtime (only does anything inside the iOS/Android app) -->
+  <script src="vendor/capacitor.js" onerror="this.remove()"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"><i></i><b></b></span>
+      <h1>Convert</h1>
+    </div>
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings and updates">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Zm7.43-2.53a7.8 7.8 0 0 0 .07-.97 7.8 7.8 0 0 0-.07-1l2.11-1.63a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.3 7.3 0 0 0-1.69-.98l-.38-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.49.42l-.38 2.65a7.7 7.7 0 0 0-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.49.49 0 0 0 .12.64L4.57 11a7.9 7.9 0 0 0 0 1.97l-2.11 1.66a.49.49 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.49.42h4c.25 0 .45-.18.49-.42l.38-2.65a7.3 7.3 0 0 0 1.69-.98l2.49 1a.5.5 0 0 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.66Z"/></svg>
+      <span class="dot" id="updateDot" hidden></span>
+    </button>
+  </header>
+
+  <main>
+    <label class="drop" id="drop">
+      <input type="file" id="fileInput" multiple hidden>
+      <span class="drop-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7 9m5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+      </span>
+      <span class="drop-title">Add photos, videos or audio</span>
+      <span class="drop-sub"><span class="only-touch">Tap to choose</span><span class="only-mouse">Drop files here or click to choose</span> · everything stays on this device</span>
+      <span class="chips" aria-label="Supported formats">
+        <span>HEIC</span><span>PNG</span><span>JPG</span><span>WEBP</span><span>GIF</span><span>MOV</span><span>MP4</span><span>WEBM</span><span>MP3</span><span>M4A</span><span>WAV</span>
+      </span>
+    </label>
+
+    <section class="combine" id="combine" hidden>
+      <label class="switch">
+        <input type="checkbox" id="combineToggle">
+        <span class="track"><span class="thumb"></span></span>
+        <span class="combine-text"><strong>Combine images into one animated GIF</strong><small id="combineCount"></small></span>
+      </label>
+      <div class="combine-opts" id="combineOpts" hidden>
+        <label>Frame time
+          <select id="combineDelay">
+            <option value="100">0.1 s</option><option value="200">0.2 s</option><option value="300">0.3 s</option>
+            <option value="500" selected>0.5 s</option><option value="1000">1 s</option><option value="2000">2 s</option>
+          </select>
+        </label>
+        <label>Size
+          <select id="combineSize">
+            <option value="360">360 px</option><option value="480">480 px</option><option value="720" selected>720 px</option><option value="1080">1080 px</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <ul class="queue" id="queue" aria-live="polite"></ul>
+
+    <p class="empty-note" id="emptyNote">Conversions run on your phone or computer. Nothing is uploaded.</p>
+  </main>
+
+  <footer class="bar" id="bar" hidden>
+    <button class="btn ghost" id="clearBtn">Clear</button>
+    <button class="btn ghost" id="saveAllBtn" hidden>Save all</button>
+    <button class="btn primary" id="convertBtn">Convert</button>
+  </footer>
+
+  <dialog class="sheet" id="settings">
+    <form method="dialog" class="sheet-inner">
+      <div class="sheet-head">
+        <h2>Settings</h2>
+        <button class="icon-btn" value="close" aria-label="Close">✕</button>
+      </div>
+      <dl class="facts">
+        <div><dt>Version</dt><dd id="verText">—</dd></div>
+        <div><dt>Running as</dt><dd id="platformText">—</dd></div>
+      </dl>
+      <div class="update-box">
+        <p id="updateMsg">Updates install automatically from GitHub.</p>
+        <div class="row">
+          <button type="button" class="btn ghost" id="checkUpdateBtn">Check for updates</button>
+          <button type="button" class="btn primary" id="applyUpdateBtn" hidden>Restart to update</button>
+        </div>
+      </div>
+      <div class="update-box" id="offlineBox">
+        <p>Download the video engine (~30 MB) now so video and audio conversion also works offline.</p>
+        <div class="row"><button type="button" class="btn ghost" id="offlineBtn">Make available offline</button></div>
+      </div>
+      <p class="fine">Tip for iPhone: choosing videos from <em>Files</em> keeps the original. The Photos picker may compress them first.</p>
+    </form>
+  </dialog>
+
+  <dialog class="preview" id="preview">
+    <form method="dialog"><button class="icon-btn close" aria-label="Close">✕</button></form>
+    <div id="previewBody"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button class="btn small" id="toastBtn" hidden></button></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
