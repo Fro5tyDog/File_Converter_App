@@ -1,6 +1,6 @@
 {
   "name": "media-converter",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "On-device photo, video and audio converter. Runs on GitHub Pages and as a sideloaded iOS/Android app that updates itself from GitHub.",
   "type": "module",

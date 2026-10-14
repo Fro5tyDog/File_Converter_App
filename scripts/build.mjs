@@ -22,9 +22,19 @@ const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
 function sh(cmd) { try { return execSync(cmd, { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return ''; } }
 
 // ---------- version ----------
+// You set MAJOR.MINOR in package.json ("version": "2.0.0" → 2.0). The last number counts the
+// commits since you last changed that line, so a bump starts again at .0:
+//   change to "2.0.0" → 2.0.0, next push → 2.0.1, 2.0.2 … change to "2.1.0" → 2.1.0 …
 const [major = 1, minor = 0] = pkg.version.split('.');
-const commits = sh('git rev-list --count HEAD') || process.env.GITHUB_RUN_NUMBER || '0';
-const version = `${major}.${minor}.${commits}`;
+function patchNumber() {
+  const bump = sh(`git log -1 --format=%H -G"\\"version\\"" -- package.json`);
+  if (bump) {
+    const n = sh(`git rev-list --count ${bump}..HEAD`);
+    if (n !== '') return n;
+  }
+  return sh('git rev-list --count HEAD') || process.env.GITHUB_RUN_NUMBER || '0';
+}
+const version = `${major}.${minor}.${patchNumber()}`;
 const buildTime = new Date().toISOString();
 
 // ---------- where updates are published ----------
@@ -61,6 +71,13 @@ const copies = [
   [pick('@ffmpeg/core', ['dist/esm/ffmpeg-core.wasm']), 'ffmpeg-core/ffmpeg-core.wasm'],
   [pick('heic2any', ['dist/heic2any.min.js', 'dist/heic2any.js']), 'heic2any.min.js'],
   [pick('@capacitor/core', ['dist/capacitor.js']), 'capacitor.js'],
+  // pdf.js (Compress → PDF). The "legacy" build supports older iPhones.
+  [pick('pdfjs-dist', ['legacy/build/pdf.min.mjs', 'build/pdf.min.mjs']), 'pdfjs/pdf.min.mjs'],
+  [pick('pdfjs-dist', ['legacy/build/pdf.worker.min.mjs', 'build/pdf.worker.min.mjs']), 'pdfjs/pdf.worker.min.mjs'],
+  // Optional data folders: fonts & character maps for PDFs that don't embed them, decoders for JPEG 2000 etc.
+  ...['cmaps', 'standard_fonts', 'wasm', 'iccs']
+    .filter(d => fs.existsSync(path.join(nm, 'pdfjs-dist', d)))
+    .map(d => [path.join(nm, 'pdfjs-dist', d), `pdfjs/${d}`]),
 ];
 for (const [from, to] of copies) {
   const dest = path.join(vendor, to);
@@ -74,7 +91,8 @@ function walk(dir, rel = '') {
 }
 const vendorFiles = walk(vendor).filter(f => !f.endsWith('.map') && !f.endsWith('.d.ts'));
 const vendorId = createHash('sha1').update(vendorFiles.map(f => `${f}:${fs.statSync(path.join(vendor, f)).size}`).join('|')).digest('hex').slice(0, 10);
-fs.writeFileSync(path.join(vendor, 'manifest.json'), JSON.stringify({ id: vendorId, files: vendorFiles.filter(f => f !== 'capacitor.js').map(f => `vendor/${f}`) }, null, 2));
+const offlineFiles = vendorFiles.filter(f => f !== 'capacitor.js' && !/^pdfjs\/(cmaps|iccs)\//.test(f) && !/LICENSE/.test(f));
+fs.writeFileSync(path.join(vendor, 'manifest.json'), JSON.stringify({ id: vendorId, files: offlineFiles.map(f => `vendor/${f}`) }, null, 2));
 
 // ---------- config + version files ----------
 fs.writeFileSync(path.join(out, 'js', 'config.js'),
