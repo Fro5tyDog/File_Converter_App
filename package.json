@@ -2,7 +2,7 @@
   "name": "media-converter",
   "version": "2.0.0",
   "private": true,
-  "description": "On-device photo, video and audio converter. Runs on GitHub Pages and as a sideloaded iOS/Android app that updates itself from GitHub.",
+  "description": "On-device toolkit: convert, scan to PDF, compress and zip files. Runs on GitHub Pages and as a sideloaded iOS/Android app that updates itself from GitHub.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -19,7 +19,8 @@
     "@capgo/capacitor-updater": "^7.0.0",
     "@ffmpeg/core": "^0.12.6",
     "@ffmpeg/ffmpeg": "^0.12.10",
-    "heic2any": "^0.0.4"
+    "heic2any": "^0.0.4",
+    "pdfjs-dist": "^5.7.284"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0"
