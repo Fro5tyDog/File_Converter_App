@@ -66,7 +66,7 @@ export function buildArgs(target, input, probe, o = {}) {
       const args = [...pre, ...inArgs, '-map', '0:v:0?', '-map', '0:a:0?',
         '-c:v', 'libx264', '-preset', o.preset || 'veryfast', '-crf', String(o.crf ?? 23),
         '-pix_fmt', 'yuv420p', '-vf', scaleFilter(o.maxSize),
-        '-c:a', 'aac', '-b:a', '160k', '-ac', '2',
+        '-c:a', 'aac', '-b:a', o.audioBitrate || '160k', '-ac', '2',
         '-movflags', '+faststart', 'out.mp4'];
       return { args, ext: 'mp4', mime: 'video/mp4', expectDuration };
     }
@@ -91,9 +91,9 @@ export function buildArgs(target, input, probe, o = {}) {
       return { args, ext: 'gif', mime: 'image/gif', expectDuration };
     }
     case 'mp3':
-      return { args: [...pre, ...inArgs, '-vn', '-map', '0:a:0', '-c:a', 'libmp3lame', '-q:a', '2', 'out.mp3'], ext: 'mp3', mime: 'audio/mpeg', expectDuration };
+      return { args: [...pre, ...inArgs, '-vn', '-map', '0:a:0', '-c:a', 'libmp3lame', ...(o.audioBitrate ? ['-b:a', o.audioBitrate] : ['-q:a', '2']), 'out.mp3'], ext: 'mp3', mime: 'audio/mpeg', expectDuration };
     case 'm4a':
-      return { args: [...pre, ...inArgs, '-vn', '-map', '0:a:0', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', 'out.m4a'], ext: 'm4a', mime: 'audio/mp4', expectDuration };
+      return { args: [...pre, ...inArgs, '-vn', '-map', '0:a:0', '-c:a', 'aac', '-b:a', o.audioBitrate || '192k', '-movflags', '+faststart', 'out.m4a'], ext: 'm4a', mime: 'audio/mp4', expectDuration };
     case 'wav':
       return { args: [...pre, ...inArgs, '-vn', '-map', '0:a:0', '-c:a', 'pcm_s16le', 'out.wav'], ext: 'wav', mime: 'audio/wav', expectDuration };
     case 'webp': // still image → webp (used when the browser can't encode WebP itself)

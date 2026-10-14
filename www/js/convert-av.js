@@ -14,6 +14,18 @@ let mountSeq = 0;
 
 export function engineLoaded() { return !!ffmpeg; }
 
+// One job at a time: the Convert and Compress tabs share a single engine.
+let chain = Promise.resolve();
+let waiting = 0;
+function exclusive(fn, onWait) {
+  if (waiting || busy) onWait?.();
+  waiting++;
+  const run = chain.then(async () => { waiting--; busy = true; try { return await fn(); } finally { busy = false; } });
+  chain = run.catch(() => {});
+  return run;
+}
+let busy = false;
+
 export async function loadEngine(onStatus) {
   if (ffmpeg) return ffmpeg;
   if (loading) return loading;
@@ -68,7 +80,11 @@ async function run(ff, args, onLine) {
   }
 }
 
-export async function probe(file, onStatus) {
+export function probe(file, onStatus) {
+  return exclusive(() => probeNow(file, onStatus));
+}
+
+async function probeNow(file, onStatus) {
   const ff = await loadEngine(onStatus);
   const input = await stageInput(ff, file);
   try {
@@ -86,7 +102,11 @@ export async function probe(file, onStatus) {
  * @param {object} opts
  * @param {(p:number|null, label?:string)=>void} onProgress
  */
-export async function convertAV(file, target, opts, onProgress) {
+export function convertAV(file, target, opts, onProgress) {
+  return exclusive(() => convertAVNow(file, target, opts, onProgress), () => onProgress(null, 'Waiting for another job…'));
+}
+
+async function convertAVNow(file, target, opts, onProgress) {
   const ff = await loadEngine(s => onProgress(null, s));
   onProgress(null, 'Reading file…');
   const input = await stageInput(ff, file);
@@ -126,7 +146,11 @@ export async function convertAV(file, target, opts, onProgress) {
 }
 
 /** Encode a still image (PNG blob) to WebP with ffmpeg — fallback for browsers (Safari) without WebP canvas encoding. */
-export async function encodeWebpViaEngine(pngBlob, quality, onProgress) {
+export function encodeWebpViaEngine(pngBlob, quality, onProgress) {
+  return exclusive(() => encodeWebpNow(pngBlob, quality, onProgress));
+}
+
+async function encodeWebpNow(pngBlob, quality, onProgress) {
   const ff = await loadEngine(s => onProgress?.(null, s));
   const name = `/still_${++mountSeq}.png`;
   await ff.writeFile(name, new Uint8Array(await pngBlob.arrayBuffer()));

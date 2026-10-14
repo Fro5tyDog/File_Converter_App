@@ -236,3 +236,17 @@ class ByteWriter {
   bytes(arr) { this.ensure(arr.length); this.buf.set(arr, this.len); this.len += arr.length; }
   result() { return this.buf.slice(0, this.len); }
 }
+
+/**
+ * Reduce one image to ≤256 colours (shared with the PNG compressor).
+ * Pixels with alpha < 128 become fully transparent (index 255) when present.
+ * @returns {{palette: Uint8Array, count: number, indices: Uint8Array, transparentIndex: number}}
+ */
+export function quantize(image, { dither = true } = {}) {
+  const alpha = hasAlphaPixels([image]);
+  const { palette, count } = buildPalette([image], alpha ? 255 : 256);
+  const transparentIndex = alpha ? 255 : -1;
+  const lookup = makeLookup(palette, count);
+  const indices = mapPixels(image, palette, lookup, transparentIndex, dither);
+  return { palette, count: alpha ? 256 : count, indices, transparentIndex };
+}

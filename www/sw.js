@@ -4,8 +4,11 @@ const VERSION = 'dev';
 const VENDOR_ID = 'dev';
 const SHELL = [
   './', './index.html', './app.css', './manifest.webmanifest',
-  './js/app.js', './js/config.js', './js/platform.js', './js/updater.js', './js/convert-image.js',
-  './js/convert-av.js', './js/ffmpeg-args.js', './js/gif-encoder.js', './js/gif-worker.js', './js/formats.js',
+  './js/app.js', './js/config.js', './js/ui.js', './js/platform.js', './js/updater.js', './js/formats.js',
+  './js/convert-image.js', './js/convert-av.js', './js/ffmpeg-args.js', './js/gif-encoder.js', './js/gif-worker.js',
+  './js/png-encoder.js', './js/crc32.js', './js/zip-writer.js', './js/pdf-writer.js', './js/pdf-raster.js',
+  './js/scan-image.js', './js/scan-worker.js',
+  './js/tools/convert.js', './js/tools/scan.js', './js/tools/compress.js', './js/tools/zip.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
 ];
 
