@@ -1,0 +1,15 @@
+{
+  "name": "Convert",
+  "short_name": "Convert",
+  "description": "Convert photos, videos and audio on your device — HEIC, PNG, JPG, WEBP, GIF, MOV, MP4, MP3.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121110",
+  "theme_color": "#121110",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
